@@ -1,12 +1,15 @@
 package com.raddan.OldVK.entity;
 
-import com.raddan.OldVK.enums.Roles;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "users")
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class User {
 
     @Id
@@ -21,7 +24,6 @@ public class User {
     private String password;
     @Column
     private String avatar;
-    @Enumerated(EnumType.STRING)
     @Column
-    private Roles role;
+    private String roles;
 }
