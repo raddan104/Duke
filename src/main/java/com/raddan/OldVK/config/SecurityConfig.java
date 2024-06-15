@@ -37,11 +37,13 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/welcome", "/auth/signup", "/auth/generateToken").permitAll())
+                        .requestMatchers("/welcome", "/auth/signup", "/auth/login").permitAll())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/user/**").authenticated())
+                        .requestMatchers("/user/**").authenticated())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("auth/admin/**").authenticated())
+                        .requestMatchers("/admin/**").authenticated())
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/edit", "/delete").authenticated())
                 .sessionManagement(sess -> sess
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())
