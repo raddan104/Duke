@@ -2,50 +2,110 @@ package com.raddan.OldVK.service;
 
 import com.raddan.OldVK.entity.Post;
 import com.raddan.OldVK.entity.User;
-import com.raddan.OldVK.exception.DeletionException;
+import com.raddan.OldVK.exception.PostNotFoundException;
+import com.raddan.OldVK.exception.UserNotFoundException;
 import com.raddan.OldVK.repository.PostRepository;
+import com.raddan.OldVK.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class PostService {
 
-    private final PostRepository postRepository;
+    @Autowired
+    private UserService userService;
 
     @Autowired
-    public PostService(PostRepository postRepository) {
-        this.postRepository = postRepository;
-    }
+    private UserRepository userRepository;
 
-    public Optional<Post> getPostById(Long postId) {
-        return postRepository.findById(postId);
-    }
+    @Autowired
+    private PostRepository postRepository;
 
-    public Post createPost(String content, User author) {
-        Post post = new Post();
-        post.setContent(content);
-        post.setAuthor(author);
-        return postRepository.save(post);
-    }
-
-    public Post updatePost(Post post) {
-        Optional<Post> existingPost = postRepository.findById(post.getId());
-        if (existingPost.isPresent()) {
-            existingPost.get().setContent(post.getContent());
-            return postRepository.save(existingPost.get());
+    public Post getPostById(Long postId) {
+        Optional<Post> optionalPost = postRepository.findById(postId);
+        if (optionalPost.isPresent()) {
+            return optionalPost.get();
+        } else {
+            throw new PostNotFoundException("No such post with ID: " + postId);
         }
-        throw new IllegalArgumentException("Post with ID: " + post.getId() + " not found!");
     }
 
-    public void deletePost(Long postId) {
+    public List<Long> getAllPosts() {
+        Long authorId = userService.getIdFromJwt();
         try {
-            postRepository.deleteById(postId);
-        } catch (RuntimeException e) {
-            String message = "Failed to delete post with ID: " + postId;
-            String cause = e.getMessage();
-            throw new DeletionException(message + "\nCause: " + cause, e);
+            Optional<List<Post>> optionalPosts = postRepository.findAllByAuthorId(authorId);
+            if (optionalPosts.isPresent()) {
+                List<Post> posts = optionalPosts.get();
+                return posts.stream().map(Post::getId).collect(Collectors.toList());
+            } else {
+                throw new PostNotFoundException("This user didn't posted anything yet!");
+            }
+        } catch (PostNotFoundException e) {
+            return Collections.emptyList();
         }
     }
+
+    public String createPost(String content) {
+        Post post = new Post();
+        Long authorId = userService.getIdFromJwt();
+        try {
+            Optional<User> optionalUser = userRepository.findById(authorId);
+            if (optionalUser.isPresent()) {
+                post.setContent(content);
+                post.setAuthor(optionalUser.get());
+                post.setCreatedAt(LocalDateTime.now());
+                postRepository.save(post);
+                return "Post successfully created!";
+            } else {
+                throw new UserNotFoundException("User not found with ID: " + authorId);
+            }
+        } catch (UserNotFoundException e) {
+            return e.getMessage();
+        }
+    }
+
+    public String updatePost(Long postId, Map<String, Object> updatedData) {
+        try {
+            Optional<Post> postOptional = postRepository.findById(postId);
+            if (postOptional.isPresent()) {
+                Post post = postOptional.get();
+                LinkedHashMap<String, Object> updatedFields = new LinkedHashMap<>(updatedData);
+
+                for (Map.Entry<String, Object> entry : updatedFields.entrySet()) {
+                    String fieldName = entry.getKey();
+                    Object fieldValue = entry.getValue();
+
+                    if (fieldName.equals("content")) {
+                        post.setContent((String) fieldValue);
+                        post.setUpdatedAt(LocalDateTime.now());
+                    }
+                }
+                postRepository.save(post);
+                return "Post updated successfully at: " + LocalDateTime.now();
+            } else {
+                throw new PostNotFoundException("There is no such post with ID: " + postId);
+            }
+        } catch (PostNotFoundException e) {
+            return e.getMessage();
+        }
+    }
+
+    public String deletePost(Long postId) {
+        try {
+            Optional<Post> optionalPost = postRepository.findById(postId);
+            if (optionalPost.isPresent()) {
+                postRepository.deleteById(postId);
+                return "Post with ID: " + postId + " successfully deleted";
+            } else {
+                throw new PostNotFoundException("There is no such post with ID: " + postId);
+            }
+        } catch (PostNotFoundException e) {
+            return e.getMessage();
+        }
+    }
+
 }

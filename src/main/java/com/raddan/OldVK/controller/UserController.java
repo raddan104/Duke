@@ -1,5 +1,6 @@
 package com.raddan.OldVK.controller;
 
+import com.raddan.OldVK.entity.User;
 import com.raddan.OldVK.service.JwtService;
 import com.raddan.OldVK.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +9,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -37,6 +39,12 @@ public class UserController {
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public String adminProfile() {
         return "Welcome to Admin Profile!";
+    }
+
+    @GetMapping("/users")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public List<User> listUsers() {
+        return userService.getListOfUsers();
     }
 
     @PutMapping("/edit")

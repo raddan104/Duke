@@ -2,6 +2,8 @@ package com.raddan.OldVK.service;
 
 import com.raddan.OldVK.entity.User;
 import com.raddan.OldVK.repository.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -11,6 +13,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -77,6 +80,10 @@ public class UserService implements UserDetailsService {
         }
     }
 
+    public List<User> getListOfUsers() {
+        return userRepository.findAll();
+    }
+
     public String deleteUser() {
         String username = getUsernameFromJwt();
         Optional<User> userForRemoval = userRepository.findByUsername(username);
@@ -88,7 +95,7 @@ public class UserService implements UserDetailsService {
         }
     }
 
-    private String getUsernameFromJwt() {
+    public String getUsernameFromJwt() {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if (principal instanceof UserDetails) {
             return ((UserDetails) principal).getUsername();
@@ -96,4 +103,26 @@ public class UserService implements UserDetailsService {
             return principal.toString();
         }
     }
+
+    public Long getIdFromJwt() {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (principal instanceof UserDetails) {
+            String username = ((UserDetails) principal).getUsername();
+            Optional<User> optionalUser = userRepository.findByUsername(username);
+            if (optionalUser.isPresent()) {
+                return optionalUser.get().getId();
+            } else {
+                Logger logger = LoggerFactory.getLogger(getClass());
+                logger.error("User not found for username: " + username);
+
+                throw new IllegalStateException("User not found for username: " + username);
+            }
+        } else {
+            Logger logger = LoggerFactory.getLogger(getClass());
+            logger.error("Principal is not an instance of UserDetails. Principal: " + principal);
+
+            throw new IllegalStateException("Unexpected principal type: " + principal.getClass().getName());
+        }
+    }
+
 }
