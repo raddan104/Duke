@@ -3,13 +3,13 @@ package com.raddan.OldVK.entity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
+
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "users")
 @Data
 @AllArgsConstructor
-@NoArgsConstructor
 public class User {
 
     @Id
@@ -26,4 +26,10 @@ public class User {
     private String avatar;
     @Column
     private String roles;
+    @Column(name = "registered_at", nullable = false)
+    private LocalDate registeredAt;
+
+    public User() {
+        this.registeredAt = LocalDate.now();
+    }
 }

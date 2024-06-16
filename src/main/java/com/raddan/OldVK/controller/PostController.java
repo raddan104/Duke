@@ -1,7 +1,7 @@
 package com.raddan.OldVK.controller;
 
 import com.raddan.OldVK.entity.Post;
-import com.raddan.OldVK.entity.PostRequest;
+import com.raddan.OldVK.entity.dto.PostRequest;
 import com.raddan.OldVK.service.PostService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

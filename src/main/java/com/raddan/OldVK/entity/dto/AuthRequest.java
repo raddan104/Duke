@@ -1,4 +1,4 @@
-package com.raddan.OldVK.entity;
+package com.raddan.OldVK.entity.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -1,6 +1,6 @@
 package com.raddan.OldVK.controller;
 
-import com.raddan.OldVK.entity.AuthRequest;
+import com.raddan.OldVK.entity.dto.AuthRequest;
 import com.raddan.OldVK.entity.User;
 import com.raddan.OldVK.service.JwtService;
 import com.raddan.OldVK.service.UserService;
