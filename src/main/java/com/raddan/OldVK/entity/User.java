@@ -7,7 +7,7 @@ import lombok.Data;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "users", uniqueConstraints = {@UniqueConstraint(columnNames = "username")})
+@Table(name = "users")
 @Data
 @AllArgsConstructor
 public class User {
@@ -16,7 +16,7 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true)
+    @Column
     private String username;
     @Column
     private String email;
@@ -28,9 +28,6 @@ public class User {
     private String roles;
     @Column(name = "registered_at", nullable = false)
     private LocalDate registeredAt;
-
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
-    private Profile profile;
 
     public User() {
         this.registeredAt = LocalDate.now();
