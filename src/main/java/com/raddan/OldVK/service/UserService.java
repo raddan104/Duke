@@ -37,7 +37,9 @@ public class UserService implements UserDetailsService {
     public String getUserProfile() {
         User authorizedUser = userRepository.findByUsername(getUsernameFromJwt())
                 .orElseThrow(() -> new JwtException("Your token is expired or illegal!"));
-        return "Profile: " + authorizedUser.getUsername() + "\nRole: " + authorizedUser.getRoles();
+        return "Profile: " + authorizedUser.getUsername() +
+                "\nRole: " + authorizedUser.getRoles() +
+                "\nFriends: " + authorizedUser.getFriends().size();
     }
 
     public String createUser(User user) {
