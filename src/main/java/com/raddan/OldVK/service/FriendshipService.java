@@ -14,7 +14,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 @Service
@@ -40,7 +42,26 @@ public class FriendshipService {
                 .collect(Collectors.toList());
     }
 
-    public Friendship sendFriendRequestByUsername(String friendUsername) {
+    public Map<Long, String> getAllFriendRequests() {
+        String username = userService.getUsernameFromJwt();
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        List<Friendship> friendRequests = friendshipRepository.findByReceiverAndStatus(user, FriendshipStatus.PENDING);
+
+        if (friendRequests == null)
+            return Collections.emptyMap();
+
+        return friendRequests.stream()
+                .collect(Collectors.toMap(
+                        Friendship::getId,
+                        friendship -> friendship.getSender().getUsername(),
+                        (existing, replacement) -> existing,
+                        ConcurrentHashMap::new)
+                );
+    }
+
+    public String sendFriendRequestByUsername(String friendUsername) {
         User friend = userRepository.findByUsername(friendUsername)
                 .orElseThrow(() -> new UsernameNotFoundException("User with username: " + friendUsername + " not found!"));
 
@@ -53,7 +74,9 @@ public class FriendshipService {
         friendship.setCreatedAt(LocalDateTime.now());
         friendship.setStatus(FriendshipStatus.PENDING);
 
-        return friendshipRepository.save(friendship);
+        friendshipRepository.save(friendship);
+
+        return "You have successfully sent a friend request to a user: " + friendUsername;
     }
 
     @Transactional
@@ -76,7 +99,7 @@ public class FriendshipService {
             userRepository.save(receiver);
             friendshipRepository.save(friendship);
 
-            return sender.getUsername() + " " + receiver.getUsername() + " are friends now!";
+            return sender.getUsername() + " and " + receiver.getUsername() + " are friends now!";
         } else {
             return "You are not allowed to do that!";
         }
@@ -99,7 +122,7 @@ public class FriendshipService {
             userRepository.save(receiver);
             friendshipRepository.save(friendship);
 
-            return sender.getUsername() + " " + receiver.getUsername() + " are friends now!";
+            return "You declined " + sender.getUsername() + "'s request.";
         } else {
             return "You are not allowed to do that!";
         }

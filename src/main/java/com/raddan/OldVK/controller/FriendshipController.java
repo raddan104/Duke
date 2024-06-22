@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/friends")
@@ -19,8 +20,13 @@ public class FriendshipController {
         return friendshipService.getAllFriends();
     }
 
+    @GetMapping("/requests")
+    public Map<Long, String> getAllFriendRequests() {
+        return friendshipService.getAllFriendRequests();
+    }
+
     @PostMapping("/request/{friendUsername}")
-    public Friendship sendFriendRequest(@PathVariable String friendUsername) {
+    public String sendFriendRequest(@PathVariable String friendUsername) {
         return friendshipService.sendFriendRequestByUsername(friendUsername);
     }
 
