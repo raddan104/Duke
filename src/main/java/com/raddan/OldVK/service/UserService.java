@@ -2,6 +2,7 @@ package com.raddan.OldVK.service;
 
 import com.raddan.OldVK.entity.User;
 import com.raddan.OldVK.repository.UserRepository;
+import io.jsonwebtoken.JwtException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +32,12 @@ public class UserService implements UserDetailsService {
         Optional<User> userDetail = userRepository.findByUsername(username);
         return userDetail.map(UserDetailsImpl::new)
                 .orElseThrow(() -> new UsernameNotFoundException(String.format("User '%s' not found!", username)));
+    }
+
+    public String getUserProfile() {
+        User authorizedUser = userRepository.findByUsername(getUsernameFromJwt())
+                .orElseThrow(() -> new JwtException("Your token is expired or illegal!"));
+        return "Profile: " + authorizedUser.getUsername() + "\nRole: " + authorizedUser.getRoles();
     }
 
     public String createUser(User user) {
@@ -74,7 +81,7 @@ public class UserService implements UserDetailsService {
             }
 
             userRepository.save(user);
-            return "User updated successfully!";
+            return user.getUsername() + " updated successfully!";
         } else {
             return "User not found!";
         }

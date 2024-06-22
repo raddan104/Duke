@@ -32,13 +32,13 @@ public class UserController {
     @GetMapping("/user/profile")
     @PreAuthorize("hasAuthority('ROLE_USER')")
     public String userProfile() {
-        return "Welcome to User Profile!";
+        return userService.getUserProfile();
     }
 
     @GetMapping("/admin/profile")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public String adminProfile() {
-        return "Welcome to Admin Profile!";
+        return userService.getUserProfile();
     }
 
     @GetMapping("/users")
