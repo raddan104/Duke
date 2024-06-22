@@ -16,14 +16,16 @@ public class Friendship {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "user1_id")
-    private User user1;
+    @JoinColumn(name = "sender")
+    private User sender;
 
     @ManyToOne
-    @JoinColumn(name = "user2_id")
-    private User user2;
+    @JoinColumn(name = "receiver")
+    private User receiver;
 
     @Enumerated(EnumType.STRING)
     private FriendshipStatus status;
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
+
 }

@@ -43,6 +43,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/admin/**").authenticated())
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/friends/**").authenticated())
+                .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/edit", "/delete", "/users").authenticated())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/feed", "/feed/**").authenticated())
