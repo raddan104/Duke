@@ -39,6 +39,7 @@ public class FriendshipService {
 
         return friends.stream()
                 .map(User::getUsername)
+                .sorted(String::compareTo)
                 .collect(Collectors.toList());
     }
 

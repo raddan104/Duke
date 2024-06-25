@@ -42,8 +42,7 @@ public class UserController {
     }
 
     @GetMapping("/users")
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    public List<User> listUsers() {
+    public List<String> listUsers() {
         return userService.getListOfUsers();
     }
 
