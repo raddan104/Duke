@@ -2,10 +2,14 @@ package com.raddan.OldVK.service;
 
 import com.raddan.OldVK.entity.Post;
 import com.raddan.OldVK.entity.User;
-import com.raddan.OldVK.exception.PostNotFoundException;
-import com.raddan.OldVK.exception.UserNotFoundException;
+import com.raddan.OldVK.exception.custom.PostNotFoundException;
+import com.raddan.OldVK.exception.custom.UnauthorizedException;
+import com.raddan.OldVK.exception.custom.UserNotFoundException;
 import com.raddan.OldVK.repository.PostRepository;
 import com.raddan.OldVK.repository.UserRepository;
+import io.jsonwebtoken.JwtException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +19,8 @@ import java.util.stream.Collectors;
 
 @Service
 public class PostService {
+
+    private static final Logger log = LoggerFactory.getLogger(PostService.class);
 
     @Autowired
     private UserService userService;
@@ -95,17 +101,33 @@ public class PostService {
     }
 
     public String deletePost(Long postId) {
-        try {
-            Optional<Post> optionalPost = postRepository.findById(postId);
-            if (optionalPost.isPresent()) {
-                postRepository.deleteById(postId);
-                return "Post with ID: " + postId + " successfully deleted";
-            } else {
-                throw new PostNotFoundException("There is no such post with ID: " + postId);
-            }
-        } catch (PostNotFoundException e) {
-            return e.getMessage();
-        }
+        User authorizedUser = userRepository.findByUsername(userService.getUsernameFromJwt())
+                .orElseThrow(() -> {
+                    String errorMessage = "Unauthorized.";
+                    log.error(errorMessage);
+                    return new JwtException(errorMessage);
+                });
+
+        return postRepository.findById(postId)
+                .map(post -> {
+                    User author = post.getAuthor();
+                    if (authorizedUser.getId().equals(author.getId())) {
+                        postRepository.deleteById(postId);
+                        String successMessage = String.format("Post '%s' deleted successfully", postId);
+                        log.info(successMessage);
+                        return successMessage;
+                    } else {
+                        String unauthorizedMessage = "Unauthorized attempt to delete post with ID " + postId;
+                        log.error(unauthorizedMessage);
+                        throw new UnauthorizedException(unauthorizedMessage);
+                    }
+                })
+                .orElseThrow(() -> {
+                    String notFoundMessage = "Post not found";
+                    log.error("Post {} not found", postId);
+                    return new PostNotFoundException(notFoundMessage);
+                });
     }
+
 
 }
