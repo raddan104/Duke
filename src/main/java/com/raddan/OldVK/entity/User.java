@@ -26,11 +26,26 @@ public class User {
     @Column
     private String password;
     @Column
-    private String avatar;
-    @Column
     private String roles;
+
+
+    @Column(name = "first_name")
+    private String firstName;
+
+    @Column(name = "last_name")
+    private String lastName;
+
+    @Column(name = "dob")
+    private LocalDate dob;
+
+    @Column(name = "bio", columnDefinition = "TEXT")
+    private String bio;
+
     @Column(name = "registered_at", nullable = false)
     private LocalDate registeredAt;
+
+    @Column
+    private String avatar;
 
     @ManyToMany
     @JoinTable(

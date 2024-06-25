@@ -6,8 +6,6 @@ import io.jsonwebtoken.JwtException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -15,11 +13,18 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.lang.reflect.Field;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
 public class UserService implements UserDetailsService {
+
+    private static final Logger log = LoggerFactory.getLogger(UserService.class);
 
     @Autowired
     private UserRepository userRepository;
@@ -53,40 +58,37 @@ public class UserService implements UserDetailsService {
     }
 
     public String updateUser(Map<String, Object> updateData) {
-        String username = getUsernameFromJwt();
-        Optional<User> userOptional = userRepository.findByUsername(username);
-        if (userOptional.isPresent()) {
-            User user = userOptional.get();
-            LinkedHashMap<String, Object> updateFields = new LinkedHashMap<>(updateData);
+        Optional<User> userOptional = userRepository.findById(getIdFromJwt());
 
-            for (Map.Entry<String, Object> entry : updateFields.entrySet()) {
-                String fieldName = entry.getKey();
-                Object fieldValue = entry.getValue();
+        return userOptional.map(user -> {
+            try {
+                DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+                for (Map.Entry<String, Object> entry : updateData.entrySet()) {
+                    String fieldName = entry.getKey();
+                    Object fieldValue = entry.getValue();
 
-                switch (fieldName) {
-                    case "username":
-                        user.setUsername((String) fieldValue);
-                        break;
-                    case "email":
-                        user.setEmail((String) fieldValue);
-                        break;
-                    case "password":
-                        user.setPassword(passwordEncoder.encode((String) fieldValue));
-                        break;
-                    case "avatar":
-                        user.setAvatar((String) fieldValue);
-                        break;
-                    case "roles":
-                        user.setRoles((String) fieldValue);
-                        break;
+                    Field field = User.class.getDeclaredField(fieldName);
+                    field.setAccessible(true);
+
+                    if (fieldName.equals("password")) {
+                        String encodedPassword = passwordEncoder.encode((String) fieldValue);
+                        field.set(user, encodedPassword);
+                    } else if (field.getType() == LocalDate.class && fieldValue instanceof String) {
+                        LocalDate localDate = LocalDate.parse((String) fieldValue, dateFormatter);
+                        field.set(user, localDate);
+                    } else {
+                        field.set(user, fieldValue);
+                    }
                 }
-            }
 
-            userRepository.save(user);
-            return user.getUsername() + " updated successfully!";
-        } else {
-            return "User not found!";
-        }
+                userRepository.save(user);
+                log.info("User {} updated successfully!", user.getUsername());
+                return String.format("'%s' updated successfully", userOptional.get().getUsername());
+            } catch (Exception e) {
+                log.error(e.getMessage());
+                return "OUCH! Some of your field is broken!";
+            }
+        }).orElse("User not found!");
     }
 
     public List<String> getListOfUsers() {
