@@ -4,7 +4,6 @@ import com.raddan.OldVK.entity.Post;
 import com.raddan.OldVK.entity.dto.PostRequest;
 import com.raddan.OldVK.service.PostService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,7 +23,7 @@ public class PostController {
     }
 
     @GetMapping
-    public List<Long> getAllPostsID() {
+    public Map<Long, String> getAllPosts() {
         return postService.getAllPosts();
     }
 

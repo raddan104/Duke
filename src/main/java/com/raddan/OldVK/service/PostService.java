@@ -8,6 +8,7 @@ import com.raddan.OldVK.exception.custom.UserNotFoundException;
 import com.raddan.OldVK.repository.PostRepository;
 import com.raddan.OldVK.repository.UserRepository;
 import io.jsonwebtoken.JwtException;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,21 +17,19 @@ import org.springframework.stereotype.Service;
 import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class PostService {
 
     private static final Logger log = LoggerFactory.getLogger(PostService.class);
 
-    @Autowired
-    private UserService userService;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private PostRepository postRepository;
+    private final UserService userService;
+    private final UserRepository userRepository;
+    private final PostRepository postRepository;
+    private final FriendshipService friendshipService;
 
     public Post getPostById(Long postId) {
         Optional<Post> optionalPost = postRepository.findById(postId);
@@ -41,19 +40,20 @@ public class PostService {
         }
     }
 
-    public List<Long> getAllPosts() {
-        Long authorId = userService.getIdFromJwt();
-        try {
-            Optional<List<Post>> optionalPosts = postRepository.findAllByAuthorId(authorId);
-            if (optionalPosts.isPresent()) {
-                List<Post> posts = optionalPosts.get();
-                return posts.stream().map(Post::getId).collect(Collectors.toList());
-            } else {
-                throw new PostNotFoundException("This user didn't posted anything yet!");
+    public Map<Long, String> getAllPosts() {
+        List<String> friends = friendshipService.getAllFriends();
+        Map<Long, String> posts = new ConcurrentHashMap<>(friends.size());
+        for (String friend : friends) {
+            Optional<User> optionalUser = userRepository.findByUsername(friend);
+            if (optionalUser.isPresent()) {
+                List<Post> allPosts = postRepository.findAllByAuthorId(optionalUser.get().getId())
+                        .orElse(null);
+                for (Post post : allPosts) {
+                    posts.put(post.getId(), post.getContent());
+                }
             }
-        } catch (PostNotFoundException e) {
-            return Collections.emptyList();
         }
+        return posts;
     }
 
     public String createPost(String content) {
