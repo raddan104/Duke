@@ -1,4 +1,4 @@
-package com.raddan.OldVK.exception;
+package com.raddan.OldVK.exception.custom;
 
 public class UserNotFoundException extends RuntimeException {
     public UserNotFoundException(String message) {
