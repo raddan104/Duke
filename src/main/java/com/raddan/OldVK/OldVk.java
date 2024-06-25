@@ -4,9 +4,9 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class OldVkApplication {
+public class OldVk {
 
 	public static void main(String[] args) {
-		SpringApplication.run(OldVkApplication.class, args);
+		SpringApplication.run(OldVk.class, args);
 	}
 }
