@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -75,29 +76,28 @@ public class PostService {
     }
 
     public String updatePost(Long postId, Map<String, Object> updatedData) {
-        try {
-            Optional<Post> postOptional = postRepository.findById(postId);
-            if (postOptional.isPresent()) {
-                Post post = postOptional.get();
-                LinkedHashMap<String, Object> updatedFields = new LinkedHashMap<>(updatedData);
+        Optional<Post> optionalPost = postRepository.findById(postId);
 
-                for (Map.Entry<String, Object> entry : updatedFields.entrySet()) {
+        return optionalPost.map(post -> {
+            try {
+                for (Map.Entry<String, Object> entry : updatedData.entrySet()) {
                     String fieldName = entry.getKey();
                     Object fieldValue = entry.getValue();
 
-                    if (fieldName.equals("content")) {
-                        post.setContent((String) fieldValue);
-                        post.setUpdatedAt(LocalDateTime.now());
-                    }
+                    Field field = Post.class.getDeclaredField(fieldName);
+                    field.setAccessible(true);
+
+                    field.set(post, fieldValue);
                 }
+                post.setUpdatedAt(LocalDateTime.now());
                 postRepository.save(post);
-                return "Post updated successfully at: " + LocalDateTime.now();
-            } else {
-                throw new PostNotFoundException("There is no such post with ID: " + postId);
+                log.info("Post {} updated successfully!", postId);
+                return String.format("Post with ID: '%s' updated successfully!", postId);
+            } catch (Exception e) {
+                log.error(e.getMessage());
+                return "OUCH! Some of your field is broken!";
             }
-        } catch (PostNotFoundException e) {
-            return e.getMessage();
-        }
+        }).orElse("Post not found!");
     }
 
     public String deletePost(Long postId) {

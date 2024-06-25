@@ -90,7 +90,7 @@ public class UserService implements UserDetailsService {
 
                 userRepository.save(user);
                 log.info("User {} updated successfully!", user.getUsername());
-                return String.format("'%s' updated successfully", userOptional.get().getUsername());
+                return String.format("'%s' updated successfully!", userOptional.get().getUsername());
             } catch (Exception e) {
                 log.error(e.getMessage());
                 return "OUCH! Some of your field is broken!";
