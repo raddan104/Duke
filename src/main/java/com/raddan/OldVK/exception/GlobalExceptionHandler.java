@@ -1,5 +1,6 @@
 package com.raddan.OldVK.exception;
 
+import com.raddan.OldVK.exception.custom.IllegalUserDetailsException;
 import com.raddan.OldVK.exception.custom.PostNotFoundException;
 import com.raddan.OldVK.exception.custom.UnauthorizedException;
 import org.springframework.http.HttpStatus;
@@ -19,6 +20,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(UnauthorizedException.class)
     public ResponseEntity<String> handleUnauthorizedException(UnauthorizedException ex, WebRequest request) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(IllegalUserDetailsException.class)
+    public ResponseEntity<String> handleIllegalUserDetailsException(IllegalUserDetailsException ex, WebRequest request) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
     }
 
 }

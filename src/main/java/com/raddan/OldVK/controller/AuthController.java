@@ -5,6 +5,7 @@ import com.raddan.OldVK.entity.User;
 import com.raddan.OldVK.service.JwtService;
 import com.raddan.OldVK.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -28,8 +29,9 @@ public class AuthController {
     private AuthenticationManager authenticationManager;
 
     @PostMapping("/signup")
-    public String signup(@RequestBody User user) {
-        return userService.createUser(user);
+    public ResponseEntity<?> signup(@RequestBody User user) {
+        String result = userService.createUser(user);
+        return ResponseEntity.ok(result);
     }
 
     @PostMapping("/login")

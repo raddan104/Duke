@@ -1,6 +1,7 @@
 package com.raddan.OldVK.service;
 
 import com.raddan.OldVK.entity.User;
+import com.raddan.OldVK.exception.custom.IllegalUserDetailsException;
 import com.raddan.OldVK.repository.UserRepository;
 import io.jsonwebtoken.JwtException;
 import org.slf4j.Logger;
@@ -48,6 +49,12 @@ public class UserService implements UserDetailsService {
     }
 
     public String createUser(User user) {
+        if (userRepository.findByUsername(user.getUsername()).isPresent()) {
+            throw new IllegalUserDetailsException("User with this username already exists!");
+        } else if (userRepository.findByEmail(user.getEmail()).isPresent()) {
+            throw new IllegalUserDetailsException("User with this e-mail already exists!");
+        }
+
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         String role = user.getRoles();
         if (role == null) {
