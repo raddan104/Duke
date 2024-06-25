@@ -10,11 +10,11 @@
 	</parent>
 	<groupId>com.raddan</groupId>
 	<artifactId>OldVK</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0.0</version>
 	<name>OldVK</name>
 	<description>VK Prototype</description>
 	<properties>
-		<java.version>21</java.version>
+		<java.version>17</java.version>
 	</properties>
 	<dependencies>
 		<dependency>
