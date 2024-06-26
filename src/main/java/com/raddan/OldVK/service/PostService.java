@@ -11,14 +11,15 @@ import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Field;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -43,16 +44,16 @@ public class PostService {
     public Map<Long, String> getAllPosts() {
         List<String> friends = friendshipService.getAllFriends();
         Map<Long, String> posts = new ConcurrentHashMap<>(friends.size());
-        for (String friend : friends) {
-            Optional<User> optionalUser = userRepository.findByUsername(friend);
-            if (optionalUser.isPresent()) {
-                List<Post> allPosts = postRepository.findAllByAuthorId(optionalUser.get().getId())
-                        .orElse(null);
-                for (Post post : allPosts) {
-                    posts.put(post.getId(), post.getContent());
-                }
-            }
-        }
+
+        friends.stream()
+                .map(userRepository::findByUsername)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .forEach(user -> {
+                    List<Post> allPosts = postRepository.findAllByAuthorId(user.getId()).orElse(Collections.emptyList());
+                    allPosts.forEach(post -> posts.put(post.getId(), post.getContent()));
+                });
+
         return posts;
     }
 
