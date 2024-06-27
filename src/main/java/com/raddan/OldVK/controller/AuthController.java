@@ -1,47 +1,76 @@
 package com.raddan.OldVK.controller;
 
-import com.raddan.OldVK.entity.dto.AuthRequest;
-import com.raddan.OldVK.entity.User;
-import com.raddan.OldVK.service.JwtService;
-import com.raddan.OldVK.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.raddan.OldVK.dto.AuthDTO;
+import com.raddan.OldVK.service.AuthService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping(path = "/api/v1/auth")
 public class AuthController {
 
-    @Autowired
-    private UserService userService;
+    private final AuthService authService;
 
-    @Autowired
-    private JwtService jwtService;
-
-    @Autowired
-    private AuthenticationManager authenticationManager;
-
-    @PostMapping("/signup")
-    public ResponseEntity<?> signup(@RequestBody User user) {
-        String result = userService.createUser(user);
-        return ResponseEntity.ok(result);
+    public AuthController(AuthService authService) {
+        this.authService = authService;
     }
 
-    @PostMapping("/login")
-    public String authenticateAndGetToken(@RequestBody AuthRequest authRequest) {
-        Authentication authentication = authenticationManager.authenticate(new
-                UsernamePasswordAuthenticationToken(authRequest.getUsername(), authRequest.getPassword()));
-        if (authentication.isAuthenticated()) {
-            return jwtService.generateToken(authRequest.getUsername());
-        } else {
-            throw new UsernameNotFoundException("Invalid user request!");
-        }
+    /**
+     * Public APIs called when registering a new user
+     *
+     * @param authDTO
+     * @return ResponseEntity
+     * **/
+    @PostMapping(path = "/register")
+    public ResponseEntity<?> register(@Valid @RequestBody AuthDTO authDTO) {
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(this.authService.register(authDTO));
+    }
+
+    /**
+     * Public API that allows user to login
+     *
+     * @param authDTO
+     * @param request
+     * @param response
+     * @return AuthResponse
+     * **/
+    @PostMapping(path = "/login")
+    public ResponseEntity<?> loginUser(
+            @Valid @RequestBody AuthDTO authDTO,
+            HttpServletRequest request,
+            HttpServletResponse response
+    ) {
+        return new ResponseEntity<>(authService.login(authDTO, request, response), HttpStatus.OK);
+    }
+
+    /**
+     * Protected route only users with the role ADMIN can hit
+     *
+     * @param authentication
+     * @return String
+     * **/
+    @GetMapping(path = "/authenticated")
+    @PreAuthorize(value = "hasAuthority('ADMIN')")
+    public String getAuthenticated(Authentication authentication) {
+        return "Admin name is " + authentication.getName();
+    }
+
+    /**
+     * Protected route. Any authenticated user can hit this
+     *
+     * @param authentication
+     * @return String
+     * **/
+    @GetMapping(path = "/user")
+    public String getUserProfile(Authentication authentication) {
+        return "This is secured rout." + "\n" + "Username: " + authentication.getName();
     }
 }
