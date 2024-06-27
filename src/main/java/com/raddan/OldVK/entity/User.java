@@ -1,87 +1,95 @@
 package com.raddan.OldVK.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
-import java.time.LocalDate;
+import java.io.Serializable;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
-@Entity
 @Table(name = "users")
-@Data
-@AllArgsConstructor
-public class User {
+@Entity
+@NoArgsConstructor
+@Getter
+@Setter
+public class User implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name = "user_id")
+    private Long userID;
 
-    @Column
+    @Column(name = "username", nullable = false, unique = true)
     private String username;
-    @Column
-    private String email;
-    @Column
+
+    @JsonIgnore
+    @Column(name = "password", nullable = false)
     private String password;
-    @Column
-    private String roles;
 
+    @Column(name = "account_enable")
+    private boolean enabled;
 
-    @Column(name = "first_name")
-    private String firstName;
+    @Column(name = "credentials_expired")
+    private boolean credentialsNonExpired;
 
-    @Column(name = "last_name")
-    private String lastName;
+    @Column(name = "account_expired")
+    private boolean accountNonExpired;
 
-    @Column(name = "dob")
-    private LocalDate dob;
+    @Column(name = "account_locked")
+    private boolean locked;
 
-    @Column(name = "bio", columnDefinition = "TEXT")
-    private String bio;
+    @JsonIgnore
+    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE}, fetch = FetchType.EAGER, mappedBy = "user", orphanRemoval = true)
+    private Set<Role> roles = new HashSet<>();
 
-    @Column(name = "registered_at", nullable = false)
-    private LocalDate registeredAt;
-
-    @Column
-    private String avatar;
-
-    @ManyToMany
-    @JoinTable(
-            name = "user_friends",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "friend_id")
-    )
-    private Set<User> friends = new HashSet<>();
-
-    public User() {
-        this.registeredAt = LocalDate.now();
+    public void addRole(Role role) {
+        this.roles.add(role);
+        role.setUser(this);
     }
 
-    @Override
-    public String toString() {
-        return "User{" +
-                "id=" + id +
-                ", username='" + username + '\'' +
-                ", email='" + email + '\'' +
-                ", password='" + password + '\'' +
-                ", avatar='" + avatar + '\'' +
-                ", roles='" + roles + '\'' +
-                ", registeredAt=" + registeredAt +
-                '}';
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return this
+                .roles
+                .stream()
+                .map(role -> new SimpleGrantedAuthority(role.getRoleEnum().toString()))
+                .collect(Collectors.toSet());
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        User user = (User) o;
-        return Objects.equals(id, user.id) && Objects.equals(username, user.username) && Objects.equals(email, user.email) && Objects.equals(password, user.password) && Objects.equals(avatar, user.avatar) && Objects.equals(roles, user.roles) && Objects.equals(registeredAt, user.registeredAt);
+        if (!(o instanceof User user)) return false;
+        return isEnabled() == user.isEnabled()
+                && isCredentialsNonExpired() == user.isCredentialsNonExpired()
+                && isAccountNonExpired() == user.isAccountNonExpired()
+                && isLocked() == user.isLocked()
+                && Objects.equals(getUserID(), user.getUserID())
+                && Objects.equals(getUsername(), user.getUsername())
+                && Objects.equals(getPassword(), user.getPassword())
+                && Objects.equals(getRoles(), user.getRoles());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, username, email, password, avatar, roles, registeredAt);
+        return Objects.hash(
+                getUserID(),
+                getUsername(),
+                getPassword(),
+                isEnabled(),
+                isCredentialsNonExpired(),
+                isAccountNonExpired(),
+                isLocked(),
+                getRoles()
+        );
     }
+
+
 }
