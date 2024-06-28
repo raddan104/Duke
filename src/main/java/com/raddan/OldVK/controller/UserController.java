@@ -7,6 +7,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.sql.SQLException;
 import java.util.Map;
 
 @RestController
@@ -28,5 +29,10 @@ public class UserController {
     public ResponseEntity<?> updateUser(@AuthenticationPrincipal UserDetails userDetails,
                                         @RequestBody Map<String, Object> updates) {
         return userService.updateUser(userDetails, updates);
+    }
+
+    @DeleteMapping
+    public ResponseEntity<?> deleteUser(Authentication authentication) throws SQLException {
+        return userService.deleteUser(authentication);
     }
 }

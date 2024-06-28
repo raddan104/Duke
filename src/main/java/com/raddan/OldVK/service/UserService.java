@@ -10,12 +10,13 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Field;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static org.springframework.http.HttpStatus.*;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 @Service
 public class UserService {
@@ -71,6 +72,22 @@ public class UserService {
         } catch (NoSuchFieldException | IllegalAccessException e) {
             logger.error("{} tried to updated his info with illegal data", userDetails.getUsername());
             return ResponseEntity.status(403).body("Error updating user. Checkout your data!");
+        }
+    }
+
+    public ResponseEntity<?> deleteUser(Authentication authentication) throws SQLException {
+        try {
+            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+            User user = userRepository.findByUsername(userDetails.getUsername())
+                    .orElseThrow(() -> new RuntimeException(userDetails.getUsername() + " not found"));
+
+            userRepository.delete(user);
+            return ResponseEntity.ok(String.format("User '%s' deleted.", userDetails.getUsername()));
+        } catch (RuntimeException e) {
+            logger.error("Can't delete user: {}", e.getMessage());
+            SQLException sqlException = new SQLException(e.getMessage());
+            sqlException.initCause(e);
+            throw sqlException;
         }
     }
 }
