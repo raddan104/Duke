@@ -32,7 +32,7 @@ public class UserController {
     }
 
     @DeleteMapping
-    public ResponseEntity<?> deleteUser(Authentication authentication) throws SQLException {
+    public ResponseEntity<?> deleteUser(Authentication authentication) {
         return userService.deleteUser(authentication);
     }
 }

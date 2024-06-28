@@ -75,7 +75,7 @@ public class UserService {
         }
     }
 
-    public ResponseEntity<?> deleteUser(Authentication authentication) throws SQLException {
+    public ResponseEntity<?> deleteUser(Authentication authentication) {
         try {
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
             User user = userRepository.findByUsername(userDetails.getUsername())
@@ -85,9 +85,8 @@ public class UserService {
             return ResponseEntity.ok(String.format("User '%s' deleted.", userDetails.getUsername()));
         } catch (RuntimeException e) {
             logger.error("Can't delete user: {}", e.getMessage());
-            SQLException sqlException = new SQLException(e.getMessage());
-            sqlException.initCause(e.getCause());
-            throw sqlException;
+            return ResponseEntity.status(INTERNAL_SERVER_ERROR)
+                    .body("Can't delete user");
         }
     }
 }
