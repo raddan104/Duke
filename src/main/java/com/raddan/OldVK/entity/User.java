@@ -5,10 +5,12 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.cglib.core.Local;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Objects;
@@ -33,6 +35,18 @@ public class User implements Serializable {
     @JsonIgnore
     @Column(name = "password", nullable = false)
     private String password;
+
+    @Column
+    private String email;
+
+    @Column
+    private String bio;
+
+    @Column
+    private LocalDate dob;
+
+    @Column
+    private LocalDate updatedAt;
 
     @Column(name = "account_enable")
     private boolean enabled;
