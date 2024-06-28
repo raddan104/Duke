@@ -17,17 +17,17 @@ public class Post {
     @Column(name = "post_id")
     private Long postID;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     @Column(name = "content", columnDefinition = "TEXT")
     private String content;
 
-    @Column(name = "media_type", length = 50)
+    @Column(name = "mediatype", length = 50)
     private String mediaType;
 
-    @Column(name = "media_url", length = 255)
+    @Column(name = "mediaurl", length = 255)
     private String mediaURL;
 
     @Column(name = "timestamp", nullable = false, updatable = false)

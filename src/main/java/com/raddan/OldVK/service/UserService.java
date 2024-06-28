@@ -86,7 +86,7 @@ public class UserService {
         } catch (RuntimeException e) {
             logger.error("Can't delete user: {}", e.getMessage());
             SQLException sqlException = new SQLException(e.getMessage());
-            sqlException.initCause(e);
+            sqlException.initCause(e.getCause());
             throw sqlException;
         }
     }

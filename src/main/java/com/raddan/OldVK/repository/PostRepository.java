@@ -9,6 +9,10 @@ import java.util.Optional;
 
 @Repository
 public interface PostRepository extends JpaRepository<Post, Long> {
-    @Query("SELECT p FROM Post p JOIN p.user u WHERE u.userId = :userId")
-    Optional<Post> findByUserId(Long userId);
+    @Query("SELECT p FROM Post p JOIN p.user u WHERE u.id = :user_id")
+    Optional<Post> findByUser_Id(Long user_id);
+
+    @Query("SELECT p FROM Post p WHERE p.id = :post_id")
+    Optional<Post> findByPost_Id(Long post_id);
+
 }
