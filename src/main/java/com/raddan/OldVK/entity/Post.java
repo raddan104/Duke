@@ -45,8 +45,8 @@ public class Post implements Serializable {
     @JsonManagedReference
     private List<Comment> comments = new ArrayList<>();
 
-//    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
-//    private List<Like> likes = new ArrayList<>();
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Like> likes = new ArrayList<>();
 
     public Post() {
         this.timestamp = LocalDateTime.now();
