@@ -62,15 +62,4 @@ public class AuthController {
     public String getAuthenticated(Authentication authentication) {
         return "Admin name is " + authentication.getName();
     }
-
-    /**
-     * Protected route. Any authenticated user can hit this
-     *
-     * @param authentication
-     * @return String
-     **/
-    @GetMapping(path = "/user")
-    public String getUserProfile(Authentication authentication) {
-        return "This is secured rout." + "\n" + "Username: " + authentication.getName();
-    }
 }

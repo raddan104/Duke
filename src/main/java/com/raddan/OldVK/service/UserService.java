@@ -5,12 +5,17 @@ import com.raddan.OldVK.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Field;
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import static org.springframework.http.HttpStatus.*;
 
 @Service
 public class UserService {
@@ -19,8 +24,34 @@ public class UserService {
 
     private final Logger logger = LoggerFactory.getLogger(UserService.class);
 
+    private enum AllowedFields {
+        userID, username, email, bio, dob
+    }
+
     public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
+    }
+
+    public ResponseEntity<?> getUserInfo(Authentication authentication) {
+        try {
+            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+            User user = userRepository.findByUsername(userDetails.getUsername())
+                    .orElseThrow(() -> new RuntimeException(userDetails.getUsername() + " not found"));
+
+            Map<String, Object> userInfo = new ConcurrentHashMap<>();
+            for (Field field : user.getClass().getDeclaredFields()) {
+                field.setAccessible(true);
+                if (Arrays.stream(AllowedFields.values()).anyMatch(af -> af.name().equals(field.getName()))) {
+                    Object value = field.get(user);
+                    String valueAsString = (value != null) ? value.toString() : "null";
+                    userInfo.put(field.getName(), valueAsString);
+                }
+            }
+            return ResponseEntity.ok(userInfo);
+        } catch (IllegalAccessException e) {
+            logger.error("Error accessing field: {}", e.getMessage());
+            return ResponseEntity.status(INTERNAL_SERVER_ERROR).body("Failed to fetch user info");
+        }
     }
 
     public ResponseEntity<?> updateUser(UserDetails userDetails, Map<String, Object> updates) {
