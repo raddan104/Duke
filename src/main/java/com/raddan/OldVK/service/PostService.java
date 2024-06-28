@@ -17,6 +17,9 @@ import java.sql.SQLException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static org.springframework.http.HttpStatus.FORBIDDEN;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+
 @Service
 public class PostService {
 
@@ -30,7 +33,7 @@ public class PostService {
         this.userRepository = userRepository;
     }
 
-    public ResponseEntity<?> getPost(Authentication authentication, Long postID) {
+    public ResponseEntity<?> getPost(Long postID) {
         try {
             Post post = postRepository.findByPost_Id(postID)
                     .orElseThrow(() -> new RuntimeException("Post not found!"));
@@ -74,6 +77,64 @@ public class PostService {
             SQLException sqlException = new SQLException(e.getMessage());
             sqlException.initCause(e.getCause());
             throw sqlException;
+        }
+    }
+
+    public ResponseEntity<?> updatePost(Authentication authentication,
+                                        Map<String, Object> updatedData,
+                                        Long postID) throws SQLException {
+        try {
+            Post post = postRepository.findByPost_Id(postID)
+                    .orElseThrow(() -> new RuntimeException("Post not found!"));
+
+            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+            User authorizedUser = userRepository.findByUsername(userDetails.getUsername())
+                    .orElseThrow(() -> new RuntimeException(userDetails.getUsername() + " not found"));
+
+            if (!post.getUser().getUserID().equals(authorizedUser.getUserID())) {
+                return ResponseEntity.status(FORBIDDEN).body("You can't edit this post!");
+            }
+
+            updatedData.forEach((fieldName, newValue) -> {
+                try {
+                    Field field = post.getClass().getDeclaredField(fieldName);
+                    field.setAccessible(true);
+                    field.set(post, newValue);
+                } catch (NoSuchFieldException | IllegalAccessException e) {
+                    logger.error("Error with updating field '{}' : {}", fieldName, e.getMessage());
+                }
+            });
+
+            postRepository.save(post);
+            return ResponseEntity.ok(String.format("Post with id '%s', successfully updated!", postID));
+        } catch (RuntimeException e) {
+            logger.error("Can't update post: {}", e.getMessage());
+            SQLException sqlException = new SQLException(e.getMessage());
+            sqlException.initCause(e.getCause());
+            throw sqlException;
+        }
+    }
+
+    public ResponseEntity<?> deletePost(Authentication authentication,
+                                        Long postID) {
+        Post post = postRepository.findByPost_Id(postID)
+                .orElseThrow(() -> new RuntimeException("Post not found with ID: " + postID));
+
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        User authorizedUser = userRepository.findByUsername(userDetails.getUsername())
+                .orElseThrow(() -> new RuntimeException(userDetails.getUsername() + " not found"));
+
+        if (!post.getUser().getUserID().equals(authorizedUser.getUserID())) {
+            return ResponseEntity.status(FORBIDDEN).body("You can't delete this post!");
+        }
+
+        try {
+            postRepository.delete(post);
+            return ResponseEntity.ok(String.format("Post '%s' deleted.", postID));
+        } catch (RuntimeException e) {
+            logger.error("Can't delete post with ID: {}. {}", postID, e.getMessage());
+            return ResponseEntity.status(INTERNAL_SERVER_ERROR)
+                    .body(String.format("Can't delete post with ID: '%s'. '%s'", postID, e.getMessage()));
         }
     }
 }

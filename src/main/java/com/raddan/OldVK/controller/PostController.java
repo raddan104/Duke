@@ -5,9 +5,12 @@ import com.raddan.OldVK.service.PostService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.sql.SQLException;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/feed")
@@ -20,9 +23,8 @@ public class PostController {
     }
 
     @GetMapping(path = "/{postID}")
-    public ResponseEntity<?> getFeed(Authentication authentication,
-                                     @PathVariable Long postID) {
-        return postService.getPost(authentication, postID);
+    public ResponseEntity<?> getFeed(@PathVariable Long postID) {
+        return postService.getPost(postID);
     }
 
     @PostMapping
@@ -30,4 +32,16 @@ public class PostController {
         return postService.createPost(authentication, postDTO);
     }
 
+    @PutMapping(path = "/{postID}")
+    public ResponseEntity<?> updatePost(Authentication authentication,
+                                        @RequestBody Map<String, Object> updatedData,
+                                        @PathVariable Long postID) throws SQLException {
+        return postService.updatePost(authentication, updatedData, postID);
+    }
+
+    @DeleteMapping(path = "/{postID}")
+    public ResponseEntity<?> deletePost(Authentication authentication,
+                                        @PathVariable Long postID) {
+        return postService.deletePost(authentication, postID);
+    }
 }
