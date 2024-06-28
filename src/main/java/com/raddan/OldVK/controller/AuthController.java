@@ -26,7 +26,7 @@ public class AuthController {
      *
      * @param authDTO
      * @return ResponseEntity
-     * **/
+     **/
     @PostMapping(path = "/register")
     public ResponseEntity<?> register(@Valid @RequestBody AuthDTO authDTO) {
         return ResponseEntity
@@ -41,7 +41,7 @@ public class AuthController {
      * @param request
      * @param response
      * @return AuthResponse
-     * **/
+     **/
     @PostMapping(path = "/login")
     public ResponseEntity<?> loginUser(
             @Valid @RequestBody AuthDTO authDTO,
@@ -56,7 +56,7 @@ public class AuthController {
      *
      * @param authentication
      * @return String
-     * **/
+     **/
     @GetMapping(path = "/authenticated")
     @PreAuthorize(value = "hasAuthority('ADMIN')")
     public String getAuthenticated(Authentication authentication) {
@@ -68,7 +68,7 @@ public class AuthController {
      *
      * @param authentication
      * @return String
-     * **/
+     **/
     @GetMapping(path = "/user")
     public String getUserProfile(Authentication authentication) {
         return "This is secured rout." + "\n" + "Username: " + authentication.getName();
