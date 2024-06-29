@@ -12,7 +12,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping(path = "/api/v1/auth")
 public class AuthController {
 
     private final AuthService authService;
@@ -27,7 +26,7 @@ public class AuthController {
      * @param authDTO
      * @return ResponseEntity
      **/
-    @PostMapping(path = "/register")
+    @PostMapping(path = "/signup")
     public ResponseEntity<?> register(@Valid @RequestBody AuthDTO authDTO) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
