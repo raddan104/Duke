@@ -9,9 +9,7 @@ import lombok.Setter;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Entity
 @Table(name = "posts")
@@ -46,7 +44,7 @@ public class Post implements Serializable {
     private List<Comment> comments = new ArrayList<>();
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Like> likes = new ArrayList<>();
+    private Set<Like> likes = new HashSet<>();
 
     public Post() {
         this.timestamp = LocalDateTime.now();
