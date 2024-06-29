@@ -72,6 +72,12 @@ public class User implements Serializable {
     @JsonManagedReference
     private List<Comment> comments = new ArrayList<>();
 
+    @OneToMany(mappedBy = "user1", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Friendship> friendships1 = new HashSet<>();
+
+    @OneToMany(mappedBy = "user2", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Friendship> friendships2 = new HashSet<>();
+
     public void addRole(Role role) {
         this.roles.add(role);
         role.setUser(this);
