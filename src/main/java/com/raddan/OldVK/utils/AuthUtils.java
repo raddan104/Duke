@@ -8,4 +8,10 @@ public class AuthUtils {
     public static UserDetails getUserDetails(Authentication authentication) {
         return (UserDetails) authentication.getPrincipal();
     }
+
+    public static String getUsernameFromSession(Authentication authentication) {
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        return userDetails.getUsername();
+    }
+
 }
