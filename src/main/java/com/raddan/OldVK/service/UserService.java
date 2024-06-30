@@ -96,7 +96,6 @@ public class UserService {
                 field.set(user, entry.getValue());
             }
 
-            user.setUpdatedAt(LocalDate.now());
             userRepository.save(user);
             return ResponseEntity.ok("User updated successfully!");
         } catch (NoSuchFieldException | IllegalAccessException e) {

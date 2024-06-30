@@ -1,9 +1,11 @@
 package com.raddan.OldVK.service;
 
 import com.raddan.OldVK.dto.AuthDTO;
+import com.raddan.OldVK.entity.Profile;
 import com.raddan.OldVK.entity.Role;
 import com.raddan.OldVK.entity.User;
 import com.raddan.OldVK.enums.RoleEnum;
+import com.raddan.OldVK.repository.ProfileRepository;
 import com.raddan.OldVK.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -27,7 +29,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
-@Service @Setter
+@Service
+@Setter
 public class AuthService {
 
     @Value(value = "${custom.max.session}")
@@ -37,6 +40,8 @@ public class AuthService {
     private String adminUsername;
 
     private final UserRepository userRepository;
+
+    private final ProfileRepository profileRepository;
 
     private final PasswordEncoder passwordEncoder;
 
@@ -51,7 +56,7 @@ public class AuthService {
     private final SessionRegistry sessionRegistry;
 
     public AuthService(
-            UserRepository userRepository,
+            UserRepository userRepository, ProfileRepository profileRepository,
             PasswordEncoder passwordEncoder,
             SecurityContextRepository securityContextRepository,
             AuthenticationManager authManager,
@@ -59,6 +64,7 @@ public class AuthService {
             SessionRegistry sessionRegistry
     ) {
         this.userRepository = userRepository;
+        this.profileRepository = profileRepository;
         this.passwordEncoder = passwordEncoder;
         this.securityContextRepository = securityContextRepository;
         this.securityContextHolderStrategy = SecurityContextHolder.getContextHolderStrategy();
@@ -85,6 +91,8 @@ public class AuthService {
         user.setCredentialsNonExpired(true);
         user.setEnabled(true);
         user.addRole(new Role(RoleEnum.USER));
+        Profile profile = ProfileService.createProfile(user);
+        profileRepository.save(profile);
 
         if (adminUsername.equals(username)) {
             user.addRole(new Role(RoleEnum.ADMIN));

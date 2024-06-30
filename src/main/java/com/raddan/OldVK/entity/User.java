@@ -39,13 +39,7 @@ public class User implements Serializable {
     private String email;
 
     @Column
-    private String bio;
-
-    @Column
-    private LocalDate dob;
-
-    @Column
-    private LocalDate updatedAt;
+    private LocalDate registerAt;
 
     @Column(name = "account_enable")
     private boolean enabled;
@@ -73,10 +67,7 @@ public class User implements Serializable {
     private List<Comment> comments = new ArrayList<>();
 
     @OneToMany(mappedBy = "user1", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Friendship> friendships1 = new HashSet<>();
-
-    @OneToMany(mappedBy = "user2", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Friendship> friendships2 = new HashSet<>();
+    private Set<Friendship> friendships = new HashSet<>();
 
     public void addRole(Role role) {
         this.roles.add(role);
