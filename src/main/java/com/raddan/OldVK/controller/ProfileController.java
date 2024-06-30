@@ -10,11 +10,11 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
-public class UserController {
+public class ProfileController {
 
     private final UserService userService;
 
-    public UserController(UserService userService) {
+    public ProfileController(UserService userService) {
         this.userService = userService;
     }
 
@@ -35,7 +35,7 @@ public class UserController {
         return userService.updateUser(userDetails, updates);
     }
 
-    @DeleteMapping(path = "/profile/delete")
+    @DeleteMapping(path = "/profile")
     public ResponseEntity<?> deleteUser(Authentication authentication) {
         return userService.deleteUser(authentication);
     }

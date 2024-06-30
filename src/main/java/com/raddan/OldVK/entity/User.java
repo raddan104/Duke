@@ -23,6 +23,8 @@ import java.util.stream.Collectors;
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class User implements Serializable {
 
+    private static final long serialVersionUID = 2428196449889448659L;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
@@ -52,6 +54,9 @@ public class User implements Serializable {
 
     @Column(name = "account_locked")
     private boolean locked;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Profile profile;
 
     @JsonIgnore
     @JsonManagedReference
