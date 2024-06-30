@@ -23,6 +23,8 @@ import java.util.stream.Collectors;
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class User implements Serializable {
 
+    private static final long serialVersionUID = 2428196449889448659L;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
@@ -39,13 +41,7 @@ public class User implements Serializable {
     private String email;
 
     @Column
-    private String bio;
-
-    @Column
-    private LocalDate dob;
-
-    @Column
-    private LocalDate updatedAt;
+    private LocalDate registerAt;
 
     @Column(name = "account_enable")
     private boolean enabled;
@@ -58,6 +54,9 @@ public class User implements Serializable {
 
     @Column(name = "account_locked")
     private boolean locked;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Profile profile;
 
     @JsonIgnore
     @JsonManagedReference
@@ -73,10 +72,7 @@ public class User implements Serializable {
     private List<Comment> comments = new ArrayList<>();
 
     @OneToMany(mappedBy = "user1", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Friendship> friendships1 = new HashSet<>();
-
-    @OneToMany(mappedBy = "user2", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Friendship> friendships2 = new HashSet<>();
+    private Set<Friendship> friendships = new HashSet<>();
 
     public void addRole(Role role) {
         this.roles.add(role);

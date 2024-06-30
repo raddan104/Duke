@@ -11,8 +11,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Field;
-import java.sql.SQLException;
-import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -27,9 +25,7 @@ public class UserService {
 
     private final Logger logger = LoggerFactory.getLogger(UserService.class);
 
-    private enum AllowedFields {
-        userID, username, email, bio, dob
-    }
+    private enum AllowedFields { userID, username, email, bio, dob }
 
     public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
@@ -96,7 +92,6 @@ public class UserService {
                 field.set(user, entry.getValue());
             }
 
-            user.setUpdatedAt(LocalDate.now());
             userRepository.save(user);
             return ResponseEntity.ok("User updated successfully!");
         } catch (NoSuchFieldException | IllegalAccessException e) {
