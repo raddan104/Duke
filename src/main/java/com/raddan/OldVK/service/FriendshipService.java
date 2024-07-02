@@ -61,10 +61,10 @@ public class FriendshipService {
             User friend = userRepository.findByUsername(friendUsername)
                     .orElseThrow(() -> new RuntimeException(friendUsername + " not found"));
 
-//            boolean requestAlreadyExists = friendshipRepository.isExistsByUser1AndUser2(authorizedUser, friend);
-//            if (requestAlreadyExists) {
-//                return ResponseEntity.status(FORBIDDEN).body("Request from you to this user already exists!");
-//            }
+            boolean requestAlreadyExists = friendshipRepository.isExistsByUser1AndUser2(authorizedUser, friend);
+            if (requestAlreadyExists) {
+                return ResponseEntity.status(FORBIDDEN).body("Request from you to this user already exists!");
+            }
 
             Friendship friendship = new Friendship();
             friendship.setUser1(authorizedUser);
