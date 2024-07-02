@@ -95,6 +95,7 @@ public class LikeService {
                     .orElseThrow(() -> new RuntimeException("Post not found"));
 
             Map<Long, String> likes = post.getLikes().stream()
+                    .filter(like -> like.getComment() == null)
                     .collect(Collectors.toConcurrentMap(
                             Like::getLikeId,
                             l -> l.getUser().getUsername()
