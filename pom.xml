@@ -9,7 +9,7 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.raddan</groupId>
-    <artifactId>OldVK</artifactId>
+    <artifactId>Duke</artifactId>
     <version>1.0.0</version>
     <name>OldVK</name>
     <description>VK Prototype</description>
