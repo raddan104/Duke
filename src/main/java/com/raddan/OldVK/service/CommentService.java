@@ -1,7 +1,6 @@
 package com.raddan.OldVK.service;
 
 import com.raddan.OldVK.dto.CommentDTO;
-import com.raddan.OldVK.dto.PostDTO;
 import com.raddan.OldVK.entity.Comment;
 import com.raddan.OldVK.entity.Post;
 import com.raddan.OldVK.entity.User;
@@ -16,14 +15,12 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
-import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-import static org.springframework.http.HttpStatus.*;
+import static org.springframework.http.HttpStatus.FORBIDDEN;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 @Service
 public class CommentService {
@@ -57,10 +54,10 @@ public class CommentService {
             comment.setUser(authorizedUser);
             comment.setPost(post);
             comment.setContent(content.trim());
-            comment.setTimestamp(LocalDate.now());
+            comment.setCreatedAt(LocalDate.now());
             commentRepository.save(comment);
 
-            return ResponseEntity.ok("Comment created successfully with ID: " + comment.getCommentID());
+            return ResponseEntity.ok("Comment created successfully with ID: " + comment.getID());
         } catch (RuntimeException e) {
             logger.error("Can't create comment: {}", e.getMessage());
             return ResponseEntity.status(INTERNAL_SERVER_ERROR).body("Failed to create comment");
@@ -91,11 +88,11 @@ public class CommentService {
                     .orElseThrow(() -> new RuntimeException("Comment not found!"));
 
             CommentDTO commentDTO = new CommentDTO();
-            commentDTO.setCommentID(comment.getCommentID());
+            commentDTO.setCommentID(comment.getID());
             commentDTO.setContent(comment.getContent());
-            commentDTO.setTimestamp(comment.getTimestamp());
+            commentDTO.setTimestamp(comment.getCreatedAt());
             commentDTO.setUsername(comment.getUser().getUsername());
-            commentDTO.setPostID(comment.getPost().getPostID());
+            commentDTO.setPostID(comment.getPost().getID());
 
             return ResponseEntity.ok(commentDTO);
         } catch (RuntimeException e) {
@@ -115,7 +112,7 @@ public class CommentService {
             User authorizedUser = userRepository.findByUsername(userDetails.getUsername())
                     .orElseThrow(() -> new RuntimeException(userDetails.getUsername() + " not found"));
 
-            if (!comment.getUser().getUserID().equals(authorizedUser.getUserID())) {
+            if (!comment.getUser().getID().equals(authorizedUser.getID())) {
                 return ResponseEntity.status(FORBIDDEN).body("You can't edit this comment!");
             }
 
@@ -137,7 +134,7 @@ public class CommentService {
         User authorizedUser = userRepository.findByUsername(userDetails.getUsername())
                 .orElseThrow(() -> new RuntimeException(userDetails.getUsername() + " not found"));
 
-        if (!comment.getUser().getUserID().equals(authorizedUser.getUserID())) {
+        if (!comment.getUser().getID().equals(authorizedUser.getID())) {
             return ResponseEntity.status(FORBIDDEN).body("You can't delete this comment!");
         }
 

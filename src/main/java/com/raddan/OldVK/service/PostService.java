@@ -71,7 +71,7 @@ public class PostService {
             postDTO.mediaUrl().ifPresent(mediaUrl -> post.setMediaURL(mediaUrl.trim()));
             postRepository.save(post);
 
-            return ResponseEntity.ok("Post created successfully with ID: " + post.getPostID());
+            return ResponseEntity.ok("Post created successfully with ID: " + post.getID());
         } catch (RuntimeException e) {
             logger.error("Can't create post: {}", e.getMessage());
             SQLException sqlException = new SQLException(e.getMessage());
@@ -91,7 +91,7 @@ public class PostService {
             User authorizedUser = userRepository.findByUsername(userDetails.getUsername())
                     .orElseThrow(() -> new RuntimeException(userDetails.getUsername() + " not found"));
 
-            if (!post.getUser().getUserID().equals(authorizedUser.getUserID())) {
+            if (!post.getUser().getID().equals(authorizedUser.getID())) {
                 return ResponseEntity.status(FORBIDDEN).body("You can't edit this post!");
             }
 
@@ -124,7 +124,7 @@ public class PostService {
         User authorizedUser = userRepository.findByUsername(userDetails.getUsername())
                 .orElseThrow(() -> new RuntimeException(userDetails.getUsername() + " not found"));
 
-        if (!post.getUser().getUserID().equals(authorizedUser.getUserID())) {
+        if (!post.getUser().getID().equals(authorizedUser.getID())) {
             return ResponseEntity.status(FORBIDDEN).body("You can't delete this post!");
         }
 

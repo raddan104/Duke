@@ -1,10 +1,6 @@
 package com.raddan.OldVK.entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.io.Serializable;
 import java.time.LocalDate;
@@ -13,57 +9,70 @@ import java.util.List;
 
 @Entity
 @Table(name = "comments")
-@Getter @Setter
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Comment implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "comment_id")
-    private Long commentID;
+    private Long ID;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "post_id")
-    @JsonBackReference(value = "post-comment")
+    @ManyToOne
+    @JoinColumn(name = "post")
     private Post post;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    @JsonBackReference(value = "user-comment")
+    @ManyToOne
+    @JoinColumn(name = "user")
     private User user;
 
-    @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL)
     private List<Like> likes = new ArrayList<>();
 
+    @Column
     private String content;
-    private LocalDate timestamp;
 
-    @Override
-    public final boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Comment comment)) return false;
+    @Column
+    private LocalDate createdAt;
 
-        return commentID.equals(comment.commentID) && post.equals(comment.post) && user.equals(comment.user) && content.equals(comment.content) && timestamp.equals(comment.timestamp);
+    public Long getID() {
+        return ID;
     }
 
-    @Override
-    public int hashCode() {
-        int result = commentID.hashCode();
-        result = 31 * result + post.hashCode();
-        result = 31 * result + user.hashCode();
-        result = 31 * result + content.hashCode();
-        result = 31 * result + timestamp.hashCode();
-        return result;
+    public Post getPost() {
+        return post;
     }
 
-    @Override
-    public String toString() {
-        return "Comment{" +
-                "commentID=" + commentID +
-                ", post=" + post +
-                ", user=" + user +
-                ", content='" + content + '\'' +
-                ", timestamp=" + timestamp +
-                '}';
+    public User getUser() {
+        return user;
+    }
+
+    public List<Like> getLikes() {
+        return likes;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public LocalDate getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setPost(Post post) {
+        this.post = post;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public void setLikes(List<Like> likes) {
+        this.likes = likes;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    public void setCreatedAt(LocalDate createdAt) {
+        this.createdAt = createdAt;
     }
 }

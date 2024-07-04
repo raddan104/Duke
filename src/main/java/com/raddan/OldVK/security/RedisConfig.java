@@ -1,6 +1,5 @@
 package com.raddan.OldVK.security;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,7 +12,7 @@ import org.springframework.security.web.session.HttpSessionEventPublisher;
 import org.springframework.session.data.redis.config.annotation.web.http.EnableRedisIndexedHttpSession;
 import org.springframework.session.web.context.AbstractHttpSessionApplicationInitializer;
 
-@Configuration @EnableRedisIndexedHttpSession @Slf4j
+@Configuration @EnableRedisIndexedHttpSession
 public class RedisConfig extends AbstractHttpSessionApplicationInitializer {
 
     private final RedisProperties redisProperties;

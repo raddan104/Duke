@@ -1,33 +1,27 @@
 package com.raddan.OldVK.entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "posts")
-@Getter @Setter
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Post implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "post_id")
-    private Long postID;
+    private Long ID;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "user_id", nullable = false)
-    @JsonBackReference
+    @ManyToOne
+    @JoinColumn(name = "user", nullable = false)
     private User user;
 
-    @Column(name = "content", columnDefinition = "TEXT")
+    @Column(columnDefinition = "text")
     private String content;
 
     @Column(name = "mediatype", length = 50)
@@ -36,54 +30,76 @@ public class Post implements Serializable {
     @Column(name = "mediaurl", length = 255)
     private String mediaURL;
 
-    @Column(name = "timestamp", nullable = false, updatable = false)
-    private LocalDateTime timestamp;
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime createdAt;
 
-    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
     private List<Comment> comments = new ArrayList<>();
 
-    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
     private Set<Like> likes = new HashSet<>();
 
     public Post() {
-        this.timestamp = LocalDateTime.now();
+        this.createdAt = LocalDateTime.now();
     }
 
-    @Override
-    public String toString() {
-        return "Post{" +
-                "postID=" + postID +
-                ", user=" + user +
-                ", content='" + content + '\'' +
-                ", mediaType='" + mediaType + '\'' +
-                ", mediaURL='" + mediaURL + '\'' +
-                ", timestamp=" + timestamp +
-                '}';
+    public void setUser(User user) {
+        this.user = user;
     }
 
-    @Override
-    public final boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Post post)) return false;
-
-        return postID.equals(post.postID)
-                && user.equals(post.user)
-                && Objects.equals(content, post.content)
-                && Objects.equals(mediaType, post.mediaType)
-                && Objects.equals(mediaURL, post.mediaURL)
-                && timestamp.equals(post.timestamp);
+    public void setContent(String content) {
+        this.content = content;
     }
 
-    @Override
-    public int hashCode() {
-        int result = postID.hashCode();
-        result = 31 * result + user.hashCode();
-        result = 31 * result + Objects.hashCode(content);
-        result = 31 * result + Objects.hashCode(mediaType);
-        result = 31 * result + Objects.hashCode(mediaURL);
-        result = 31 * result + timestamp.hashCode();
-        return result;
+    public void setMediaType(String mediaType) {
+        this.mediaType = mediaType;
     }
 
+    public void setMediaURL(String mediaURL) {
+        this.mediaURL = mediaURL;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public void setComments(List<Comment> comments) {
+        this.comments = comments;
+    }
+
+    public void setLikes(Set<Like> likes) {
+        this.likes = likes;
+    }
+
+    public Long getID() {
+        return ID;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public String getMediaType() {
+        return mediaType;
+    }
+
+    public String getMediaURL() {
+        return mediaURL;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public List<Comment> getComments() {
+        return comments;
+    }
+
+    public Set<Like> getLikes() {
+        return likes;
+    }
 }

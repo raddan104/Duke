@@ -54,7 +54,7 @@ public class LikeService {
             Like like = new Like();
             like.setPost(post);
             like.setUser(authorizedUser);
-            like.setTimestamp(LocalDate.now());
+            like.setCreatedAt(LocalDate.now());
 
             likeRepository.save(like);
             return ResponseEntity.ok("Like created successfully!");
@@ -79,7 +79,7 @@ public class LikeService {
             like.setComment(comment);
             like.setPost(comment.getPost());
             like.setUser(authorizedUser);
-            like.setTimestamp(LocalDate.now());
+            like.setCreatedAt(LocalDate.now());
 
             likeRepository.save(like);
             return ResponseEntity.ok("Like created successfully!");
@@ -97,7 +97,7 @@ public class LikeService {
             Map<Long, String> likes = post.getLikes().stream()
                     .filter(like -> like.getComment() == null)
                     .collect(Collectors.toConcurrentMap(
-                            Like::getLikeId,
+                            Like::getID,
                             l -> l.getUser().getUsername()
                     ));
 
@@ -115,7 +115,7 @@ public class LikeService {
 
             Map<Long, String> likes = comment.getLikes().stream()
                     .collect(Collectors.toConcurrentMap(
-                            Like::getLikeId,
+                            Like::getID,
                             l -> l.getUser().getUsername()
                     ));
 
@@ -136,7 +136,7 @@ public class LikeService {
             User authorizedUser = userRepository.findByUsername(userDetails.getUsername())
                     .orElseThrow(() -> new RuntimeException(userDetails.getUsername() + " not found"));
 
-            if (!like.getUser().getUserID().equals(authorizedUser.getUserID())) {
+            if (!like.getUser().getID().equals(authorizedUser.getID())) {
                 return ResponseEntity.status(FORBIDDEN).body("You can't delete this like!");
             }
 

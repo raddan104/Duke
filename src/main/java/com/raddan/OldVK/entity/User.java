@@ -1,78 +1,58 @@
 package com.raddan.OldVK.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import java.io.Serializable;
-import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Table(name = "users")
 @Entity
-@NoArgsConstructor
-@Getter
-@Setter
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+@Table(name = "users")
 public class User implements Serializable {
-
-    private static final long serialVersionUID = 2428196449889448659L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "user_id")
-    private Long userID;
+    private Long ID;
 
-    @Column(name = "username", nullable = false, unique = true)
+    @Column
     private String username;
-
-    @JsonIgnore
-    @Column(name = "password", nullable = false)
-    private String password;
 
     @Column
     private String email;
 
     @Column
-    private LocalDate registerAt;
+    private String password;
 
-    @Column(name = "account_enable")
-    private boolean enabled;
+    @Column
+    private boolean isMailConfirmed;
 
-    @Column(name = "credentials_expired")
-    private boolean credentialsNonExpired;
+    @Column
+    private boolean isEnabled;
 
-    @Column(name = "account_expired")
-    private boolean accountNonExpired;
+    @Column
+    private boolean isCredentialsNonExpired;
 
-    @Column(name = "account_locked")
-    private boolean locked;
+    @Column
+    private boolean isAccountNonExpired;
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Column
+    private boolean isLocked;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     private Profile profile;
 
-    @JsonIgnore
-    @JsonManagedReference
     @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE}, fetch = FetchType.EAGER, mappedBy = "user", orphanRemoval = true)
     private Set<Role> roles = new HashSet<>();
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Post> posts = new ArrayList<>();
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Comment> comments = new ArrayList<>();
 
-    @OneToMany(mappedBy = "user1", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Friendship> friendships = new HashSet<>();
+    public User() { }
 
     public void addRole(Role role) {
         this.roles.add(role);
@@ -87,33 +67,103 @@ public class User implements Serializable {
                 .collect(Collectors.toSet());
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof User user)) return false;
-        return isEnabled() == user.isEnabled()
-                && isCredentialsNonExpired() == user.isCredentialsNonExpired()
-                && isAccountNonExpired() == user.isAccountNonExpired()
-                && isLocked() == user.isLocked()
-                && Objects.equals(getUserID(), user.getUserID())
-                && Objects.equals(getUsername(), user.getUsername())
-                && Objects.equals(getPassword(), user.getPassword())
-                && Objects.equals(getRoles(), user.getRoles());
+    public Long getID() {
+        return ID;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(
-                getUserID(),
-                getUsername(),
-                getPassword(),
-                isEnabled(),
-                isCredentialsNonExpired(),
-                isAccountNonExpired(),
-                isLocked(),
-                getRoles()
-        );
+    public String getUsername() {
+        return username;
     }
 
+    public String getEmail() {
+        return email;
+    }
 
+    public String getPassword() {
+        return password;
+    }
+
+    public boolean isMailConfirmed() {
+        return isMailConfirmed;
+    }
+
+    public boolean isEnabled() {
+        return isEnabled;
+    }
+
+    public boolean isCredentialsNonExpired() {
+        return isCredentialsNonExpired;
+    }
+
+    public boolean isAccountNonExpired() {
+        return isAccountNonExpired;
+    }
+
+    public boolean isLocked() {
+        return isLocked;
+    }
+
+    public Profile getProfile() {
+        return profile;
+    }
+
+    public Set<Role> getRoles() {
+        return roles;
+    }
+
+    public List<Post> getPosts() {
+        return posts;
+    }
+
+    public List<Comment> getComments() {
+        return comments;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public void setMailConfirmed(boolean mailConfirmed) {
+        isMailConfirmed = mailConfirmed;
+    }
+
+    public void setEnabled(boolean enabled) {
+        isEnabled = enabled;
+    }
+
+    public void setCredentialsNonExpired(boolean credentialsNonExpired) {
+        isCredentialsNonExpired = credentialsNonExpired;
+    }
+
+    public void setAccountNonExpired(boolean accountNonExpired) {
+        isAccountNonExpired = accountNonExpired;
+    }
+
+    public void setLocked(boolean locked) {
+        isLocked = locked;
+    }
+
+    public void setProfile(Profile profile) {
+        this.profile = profile;
+    }
+
+    public void setRoles(Set<Role> roles) {
+        this.roles = roles;
+    }
+
+    public void setPosts(List<Post> posts) {
+        this.posts = posts;
+    }
+
+    public void setComments(List<Comment> comments) {
+        this.comments = comments;
+    }
 }

@@ -2,22 +2,16 @@ package com.raddan.OldVK.entity;
 
 import com.raddan.OldVK.enums.RoleEnum;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import java.io.Serializable;
 
-@Table(name = "roles")
 @Entity
-@NoArgsConstructor
-@Getter @Setter
+@Table(name = "roles")
 public class Role implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "role_id", updatable = false, nullable = false)
-    private Long roleID;
+    private Long ID;
 
     @Column(name = "role")
     @Enumerated(value = EnumType.STRING)
@@ -25,12 +19,32 @@ public class Role implements Serializable {
 
     @ManyToOne
     @JoinColumn(
-            name = "user_id",
+            name = "user",
             nullable = false,
             referencedColumnName = "user_id",
             foreignKey = @ForeignKey(name = "role_user_fk")
     )
     private User user;
+
+    public void setRoleEnum(RoleEnum roleEnum) {
+        this.roleEnum = roleEnum;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public Long getID() {
+        return ID;
+    }
+
+    public RoleEnum getRoleEnum() {
+        return roleEnum;
+    }
+
+    public User getUser() {
+        return user;
+    }
 
     public Role(RoleEnum roleEnum) {
         this.roleEnum = roleEnum;

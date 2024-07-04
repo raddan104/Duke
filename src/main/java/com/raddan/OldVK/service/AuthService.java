@@ -9,7 +9,6 @@ import com.raddan.OldVK.repository.ProfileRepository;
 import com.raddan.OldVK.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.Setter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -30,7 +29,6 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-@Setter
 public class AuthService {
 
     @Value(value = "${custom.max.session}")
