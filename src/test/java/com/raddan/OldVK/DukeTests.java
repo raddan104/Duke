@@ -12,7 +12,7 @@ import org.testcontainers.utility.DockerImageName;
 
 @SpringBootTest
 @Testcontainers
-class OldVkTests {
+class DukeTests {
 
 	@Container
 	public static PostgreSQLContainer<?> container = new PostgreSQLContainer<>("postgres:latest")
